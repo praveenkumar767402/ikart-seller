@@ -1,0 +1,21 @@
+.seller-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f9fafb;
+}
+
+.seller-main {
+    flex: 1;
+    margin-left: 260px;
+    /* Width of sidebar */
+    padding: 2rem;
+    width: calc(100% - 260px);
+}
+
+@media (max-width: 768px) {
+    .seller-main {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+    }
+}
