@@ -35,7 +35,7 @@ const SellerDashboard = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('sellerToken');
-                const response = await fetch('http://localhost:8000/api/seller/stats', {
+                const response = await fetch('/api/seller/stats', {
                     headers: { 'x-auth-token': token }
                 });
                 const data = await response.json();

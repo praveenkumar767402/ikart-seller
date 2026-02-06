@@ -19,6 +19,11 @@ exports.signup = async (req, res) => {
         });
 
         const payload = { seller: { id: seller.id } };
+
+        // Sync to User Project
+        const syncService = require('../services/syncService');
+        await syncService.syncSeller(seller.toJSON());
+
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
             if (err) throw err;
             res.json({ token, user: { id: seller.id, name: seller.companyName, email: seller.email, role: 'seller' } });

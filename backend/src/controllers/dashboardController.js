@@ -26,7 +26,16 @@ exports.updateProfile = async (req, res) => {
         if (location !== undefined) seller.location = location;
         if (website !== undefined) seller.website = website;
 
+        if (req.file) {
+            seller.image = `http://localhost:8000/uploads/${req.file.filename}`;
+        }
+
         await seller.save();
+
+        // Sync to User Project
+        const syncService = require('../services/syncService');
+        await syncService.syncSeller(seller.toJSON());
+
         res.json({ SUCCESS: true, seller });
     } catch (err) {
         console.error(err.message);

@@ -19,7 +19,7 @@ const SellerProducts = () => {
     const fetchProducts = async () => {
         try {
             const token = localStorage.getItem('sellerToken');
-            const response = await fetch('http://localhost:8000/api/products', {
+            const response = await fetch('/api/products', {
                 headers: { 'x-auth-token': token }
             });
             const data = await response.json();
@@ -72,11 +72,11 @@ const SellerProducts = () => {
                 formData.append('image', newProduct.image);
             }
 
-            let url = 'http://localhost:8000/api/products';
+            let url = '/api/products';
             let method = 'POST';
 
             if (editingProduct) {
-                url = `http://localhost:8000/api/products/${editingProduct.id}`;
+                url = `/api/products/${editingProduct.id}`;
                 method = 'PUT';
             }
 

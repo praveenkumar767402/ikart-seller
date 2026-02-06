@@ -1,27 +1,31 @@
-import React from 'react';
-import { Save, User, MapPin, Globe, FileText } from 'lucide-react';
-import './SellerProducts.css'; // Reusing styles for consistency (or create new if needed)
+import React, { useState, useEffect } from 'react';
+import { Save, User, MapPin, Globe, FileText, Camera } from 'lucide-react';
+import './SellerProducts.css'; // Reusing styles
 
 const SellerSettings = () => {
-    const [profile, setProfile] = React.useState({
+    const [profile, setProfile] = useState({
         companyName: '',
         email: '',
         bio: '',
         location: '',
-        website: ''
+        website: '',
+        image: ''
     });
-    const [loading, setLoading] = React.useState(true);
-    const [message, setMessage] = React.useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState('');
 
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('sellerToken');
-            const response = await fetch('http://localhost:8000/api/seller/profile', {
+            const response = await fetch('/api/seller/profile', {
                 headers: { 'x-auth-token': token }
             });
             const data = await response.json();
             if (response.ok) {
                 setProfile(data);
+                if (data.image) setPreview(data.image);
             }
         } catch (error) {
             console.error("Error fetching profile:", error);
@@ -30,7 +34,7 @@ const SellerSettings = () => {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchProfile();
     }, []);
 
@@ -38,18 +42,35 @@ const SellerSettings = () => {
         setProfile({ ...profile, [e.target.name]: e.target.value });
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('');
+        setMessage('Saving...');
         try {
             const token = localStorage.getItem('sellerToken');
-            const response = await fetch('http://localhost:8000/api/seller/profile', {
+            const formData = new FormData();
+            formData.append('companyName', profile.companyName);
+            formData.append('bio', profile.bio || '');
+            formData.append('location', profile.location || '');
+            formData.append('website', profile.website || '');
+            if (selectedFile) {
+                formData.append('image', selectedFile);
+            }
+
+            const response = await fetch('/api/seller/profile', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'x-auth-token': token
+                    // Content-Type not needed, fetch sets it for FormData
                 },
-                body: JSON.stringify(profile)
+                body: formData
             });
 
             const data = await response.json();
@@ -78,6 +99,29 @@ const SellerSettings = () => {
 
             <div className="settings-container" style={{ maxWidth: '800px', backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                 <form onSubmit={handleSubmit}>
+
+                    {/* Profile Image Section */}
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+                        <div style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '1rem' }}>
+                            <img
+                                src={preview || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.companyName || 'User')}&background=f3f4f6`}
+                                alt="Profile"
+                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                            />
+                            <label htmlFor="image-upload" style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--color-primary)', color: 'white', padding: '8px', borderRadius: '50%', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                                <Camera size={18} />
+                            </label>
+                            <input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                        </div>
+                        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Click the camera icon to update photo</p>
+                    </div>
+
                     <div className="form-group">
                         <label><User size={16} style={{ display: 'inline', marginRight: '8px' }} />Company Name</label>
                         <input type="text" name="companyName" value={profile.companyName} onChange={handleChange} required />

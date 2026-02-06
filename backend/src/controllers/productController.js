@@ -1,4 +1,5 @@
 const { Product } = require('../models');
+const syncService = require('../services/syncService');
 
 exports.getProducts = async (req, res) => {
     try {
@@ -24,6 +25,10 @@ exports.createProduct = async (req, res) => {
             image,
             sellerId: req.seller.id
         });
+
+        // Sync to User Project
+        await syncService.syncProduct(newProduct.toJSON());
+
         res.json(newProduct);
     } catch (err) {
         console.error(err.message);
@@ -44,6 +49,10 @@ exports.updateProduct = async (req, res) => {
         }
 
         await product.update(updateData);
+
+        // Sync to User Project
+        await syncService.syncProduct(product.toJSON());
+
         res.json(product);
     } catch (err) {
         console.error(err.message);
@@ -57,6 +66,10 @@ exports.deleteProduct = async (req, res) => {
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
         await product.destroy();
+
+        // Sync to User Project
+        await syncService.deleteProduct(req.params.id);
+
         res.json({ message: 'Product removed' });
     } catch (err) {
         console.error(err.message);

@@ -31,6 +31,10 @@ const Seller = sequelize.define('Seller', {
     website: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    image: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'Sellers',

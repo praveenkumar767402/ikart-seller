@@ -21,8 +21,12 @@ app.use('/api/products', require('./routes/productRoutes')); // Note: now at /ap
 app.use('/api/seller', require('./routes/dashboardRoutes')); // Kept for consistency with frontend
 app.use('/api/public', require('./routes/publicRoutes'));
 
+app.get('/', (req, res) => {
+    res.send('Seller Backend API is Running');
+});
+
 // Sync DB and Start Server
-sequelize.sync({ alter: true })
+sequelize.sync({ alter: false })
     .then(() => {
         console.log('✅ Seller Database Synced');
         app.listen(PORT, () => {
